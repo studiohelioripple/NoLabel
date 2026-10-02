@@ -2,17 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSIconPath</key>
-	<string>Automator</string>
 	<key>NSServices</key>
 	<array>
 		<dict>
 			<key>NSBackgroundColorName</key>
 			<string>background</string>
-			<key>NSBackgroundStrokeColorName</key>
-			<string>line</string>
 			<key>NSIconName</key>
-			<string>Automator</string>
+			<string>NSActionTemplate</string>
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
@@ -28,13 +24,6 @@
 			<key>NSSendFileTypes</key>
 			<array>
 				<string>public.item</string>
-				<string>public.image</string>
-				<string>public.jpeg</string>
-				<string>public.png</string>
-				<string>com.adobe.pdf</string>
-				<string>org.openxmlformats.presentationml.presentation</string>
-				<string>com.microsoft.powerpoint.ppt</string>
-				<string>com.apple.keynote.key</string>
 			</array>
 		</dict>
 	</array>

@@ -82,7 +82,14 @@ mkdir -p "$SERVICES_DIR"
 rm -rf "$SERVICES_DIR/Remove Corner Label.workflow"
 if [ -d "$REPO_DIR/quick_action/Remove Corner Label.workflow" ]; then
     cp -R "$REPO_DIR/quick_action/Remove Corner Label.workflow" "$SERVICES_DIR/"
-    echo "[✓] Quick Action installed."
+
+    # Enable in macOS Pasteboard & Services (pbs) database
+    defaults write pbs NSServicesStatus -dict-add "(null) - Remove Corner Label - runWorkflowAsService" '{ "presentation_modes" = { ContextMenu = 1; FinderPreview = 1; ServicesMenu = 1; TouchBar = 0; }; }' 2>/dev/null || true
+    defaults write pbs FinderActive -dict-add "Remove Corner Label - Remove Corner Label - runWorkflowAsService" 1 2>/dev/null || true
+    defaults write pbs FinderActive -dict-add "(null) - Remove Corner Label - runWorkflowAsService" 1 2>/dev/null || true
+
+    /System/Library/CoreServices/pbs -update 2>/dev/null || /System/Library/CoreServices/pbs -flush 2>/dev/null || true
+    echo "[✓] Quick Action installed and registered."
 else
     echo "[!] Warning: Quick Action workflow not found at $REPO_DIR/quick_action/Remove Corner Label.workflow"
 fi
