@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+# NoLabel CLI Launcher
+set -e
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+SUITE_DIR="$(cd -P "${SCRIPT_DIR}/.." && pwd)"
+VENV_PYTHON="${SUITE_DIR}/.venv/bin/python"
+PLIST_SRC="${SUITE_DIR}/launchd/com.nolabel.daemon.plist"
+USER_LAUNCHAGENTS="${HOME}/Library/LaunchAgents"
+PLIST_DEST="${USER_LAUNCHAGENTS}/com.nolabel.daemon.plist"
+WATCH_FOLDER="${HOME}/Documents/Label-Cleaner"
+BACKUP_FOLDER="${WATCH_FOLDER}/backup"
+
+export PYTHONPATH="${SUITE_DIR}/scripts:${PYTHONPATH}"
+
+show_help() {
+    cat << H_EOF
+NoLabel - Automated Corner Label & Watermark Removal Suite
+Tool Directory:   ${SUITE_DIR}
+Monitored Folder: ${WATCH_FOLDER}
+Backup Folder:    ${BACKUP_FOLDER}
+
+Usage:
+  nolabel process <file|dir> [--radius 3] [--method telea|ns]
+      Patch corner labels in a file or directory in-place (backup saved to backup/).
+      
+  nolabel watch
+      Run the folder watcher in foreground.
+      
+  nolabel status
+      Show service, queue, and daemon status.
+      
+  nolabel install-service
+      Install and activate background watcher daemon via macOS launchd.
+      
+  nolabel uninstall-service
+      Stop and remove the launchd background service.
+      
+  nolabel logs
+      Display recent queue and processing activity logs.
+H_EOF
+}
+
+COMMAND="$1"
+shift || true
+
+case "${COMMAND}" in
+    process)
+        if [ -z "$1" ]; then
+            echo "Error: Missing target file or directory."
+            echo "Usage: nolabel process <file_or_dir>"
+            exit 1
+        fi
+        exec "${VENV_PYTHON}" -c "
+import sys
+from pathlib import Path
+sys.path.insert(0, '${SUITE_DIR}/scripts')
+from queue_worker import NoLabelQueue
+
+target = Path('$1').resolve()
+watch_dir = target.parent if target.is_file() or (target.is_dir() and target.suffix.lower() == '.key') else target
+q = NoLabelQueue(watch_dir=watch_dir)
+
+if target.is_file() or (target.is_dir() and target.suffix.lower() == '.key'):
+    success = q.process_single_file(target, force=True)
+    sys.exit(0 if success else 1)
+elif target.is_dir():
+    processed_count = 0
+    for f in sorted(target.iterdir()):
+        if f.is_file() or (f.is_dir() and f.suffix.lower() == '.key'):
+            if f.name.startswith('.') or f.name == 'backup':
+                continue
+            if q.process_single_file(f, force=True):
+                processed_count += 1
+    sys.exit(0)
+"
+        ;;
+
+    watch)
+        exec "${VENV_PYTHON}" "${SUITE_DIR}/scripts/folder_watcher.py" "$@"
+        ;;
+
+    install-service)
+        echo "[*] Installing NoLabel launchd background service..."
+        mkdir -p "${USER_LAUNCHAGENTS}"
+        sed -e "s|{{SUITE_DIR}}|${SUITE_DIR}|g" \
+            -e "s|{{PYTHON_BIN}}|${VENV_PYTHON}|g" \
+            -e "s|{{HOME}}|${HOME}|g" \
+            "${SUITE_DIR}/launchd/com.nolabel.daemon.plist.template" > "${PLIST_DEST}"
+        
+        launchctl unload "${PLIST_DEST}" 2>/dev/null || true
+        launchctl load -w "${PLIST_DEST}"
+        echo "[✓] NoLabel launchd service successfully installed and running!"
+        ;;
+
+    uninstall-service)
+        echo "[*] Stopping and uninstalling NoLabel launchd service..."
+        launchctl unload "${PLIST_DEST}" 2>/dev/null || true
+        rm -f "${PLIST_DEST}"
+        echo "[✓] Service uninstalled."
+        ;;
+
+    status)
+        echo "=========================================="
+        echo "NoLabel System Status"
+        echo "=========================================="
+        echo "Tools Directory:   ${SUITE_DIR}"
+        echo "Monitored Folder:  ${WATCH_FOLDER}"
+        echo "Backup Folder:     ${BACKUP_FOLDER}"
+        echo ""
+        echo "--- launchd Daemon Status ---"
+        if launchctl list | grep -q "com.nolabel.daemon"; then
+            echo "  Status: ACTIVE (running via launchd)"
+        else
+            echo "  Status: Inactive / Not loaded"
+        fi
+        echo ""
+        echo "--- Monitored Folder Media ---"
+        if [ -d "${WATCH_FOLDER}" ]; then
+            media_count=$(find "${WATCH_FOLDER}" -maxdepth 1 -type f -not -name ".*" 2>/dev/null | wc -l | tr -d ' ')
+            key_count=$(find "${WATCH_FOLDER}" -maxdepth 1 -type d -name "*.key" 2>/dev/null | wc -l | tr -d ' ')
+            echo "  Media in folder:  $((media_count + key_count)) files (auto-patched in-place)"
+        else
+            echo "  Media in folder:  0 (Folder not created yet)"
+        fi
+        if [ -d "${BACKUP_FOLDER}" ]; then
+            backup_count=$(find "${BACKUP_FOLDER}" -maxdepth 1 -not -name ".*" -not -name "backup" 2>/dev/null | wc -l | tr -d ' ')
+            echo "  Backups saved:    ${backup_count} files"
+        else
+            echo "  Backups saved:    0 files"
+        fi
+        echo ""
+        echo "--- Recent Activity Logs ---"
+        if [ -f "${SUITE_DIR}/logs/queue.log" ]; then
+            tail -n 6 "${SUITE_DIR}/logs/queue.log"
+        else
+            echo "  No logs yet."
+        fi
+        echo "=========================================="
+        ;;
+
+    logs)
+        if [ -f "${SUITE_DIR}/logs/queue.log" ]; then
+            tail -f "${SUITE_DIR}/logs/queue.log"
+        else
+            echo "No log file found at ${SUITE_DIR}/logs/queue.log"
+        fi
+        ;;
+
+    help|--help|-h|"")
+        show_help
+        ;;
+
+    *)
+        echo "Unknown command: ${COMMAND}"
+        show_help
+        exit 1
+        ;;
+esac

@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMApplicationBuild</key>
+	<string>523</string>
+	<key>AMApplicationVersion</key>
+	<string>2.10</string>
+	<key>AMDocumentVersion</key>
+	<string>2</string>
+	<key>actions</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<false/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.path</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>2.0.3</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<dict/>
+					<key>CheckedForUserDefault</key>
+					<dict/>
+					<key>inputMethod</key>
+					<dict/>
+					<key>shell</key>
+					<dict/>
+					<key>source</key>
+					<dict/>
+				</dict>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.path</string>
+					</array>
+				</dict>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run Shell Script.action</string>
+				<key>ActionName</key>
+				<string>Run Shell Script</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+
+NOLABEL_CLI="$HOME/.local/bin/nolabel"
+if [ ! -x "$NOLABEL_CLI" ]; then
+    NOLABEL_CLI="$HOME/.local/share/nolabel/bin/nolabel"
+fi
+
+if [ ! -x "$NOLABEL_CLI" ]; then
+    osascript -e 'display alert "NoLabel Error" message "NoLabel CLI not found at ~/.local/bin/nolabel." as critical'
+    exit 1
+fi
+
+TOTAL=0
+for f in "$@"; do
+    if [ -e "$f" ]; then
+        TOTAL=$((TOTAL + 1))
+    fi
+done
+
+if [ "$TOTAL" -eq 0 ]; then
+    exit 0
+fi
+
+if [ "$TOTAL" -gt 1 ]; then
+    osascript -e "display notification \"Processing $TOTAL item(s) for corner label removal...\" with title \"NoLabel\" sound name \"Tink\""
+fi
+
+SUCCESS_COUNT=0
+for f in "$@"; do
+    if [ ! -e "$f" ]; then
+        continue
+    fi
+    if "$NOLABEL_CLI" process "$f"; then
+        SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+    fi
+done
+
+if [ "$SUCCESS_COUNT" -gt 0 ]; then
+    if [ "$SUCCESS_COUNT" -eq 1 ] &amp;&amp; [ "$TOTAL" -eq 1 ]; then
+        osascript -e "display notification \"Label removal completed for $(basename "$1")\" with title \"NoLabel\" subtitle \"Original saved to backup/\" sound name \"Glass\""
+    else
+        osascript -e "display notification \"Label removal completed for $SUCCESS_COUNT of $TOTAL files\" with title \"NoLabel\" subtitle \"Originals saved to backup/\" sound name \"Glass\""
+    fi
+fi
+</string>
+					<key>CheckedForUserDefault</key>
+					<true/>
+					<key>inputMethod</key>
+					<integer>1</integer>
+					<key>shell</key>
+					<string>/bin/bash</string>
+					<key>source</key>
+					<string></string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.RunShellScript</string>
+				<key>CFBundleVersion</key>
+				<string>2.0.3</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunShellScriptAction</string>
+				<key>InputUUID</key>
+				<string>9B609E2B-5DF1-460B-A57E-12A8FA1D8F41</string>
+				<key>Keywords</key>
+				<array>
+					<string>Shell</string>
+					<string>Script</string>
+					<string>Command</string>
+					<string>Run</string>
+					<string>Unix</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>0F05CA7F-DDE5-4DB8-AE82-1D5FA01E35CD</string>
+				<key>UUID</key>
+				<string>93B6E09D-1F92-4C10-85A5-D627F13813B0</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict>
+					<key>0</key>
+					<dict>
+						<key>default value</key>
+						<integer>0</integer>
+						<key>name</key>
+						<string>inputMethod</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>value</key>
+						<integer>1</integer>
+					</dict>
+					<key>1</key>
+					<dict>
+						<key>default value</key>
+						<false/>
+						<key>name</key>
+						<string>CheckedForUserDefault</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>value</key>
+						<true/>
+					</dict>
+					<key>2</key>
+					<dict>
+						<key>default value</key>
+						<string></string>
+						<key>name</key>
+						<string>source</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>value</key>
+						<string></string>
+					</dict>
+					<key>3</key>
+					<dict>
+						<key>default value</key>
+						<string></string>
+						<key>name</key>
+						<string>COMMAND_STRING</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>value</key>
+						<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+
+NOLABEL_CLI="$HOME/.local/bin/nolabel"
+if [ ! -x "$NOLABEL_CLI" ]; then
+    NOLABEL_CLI="$HOME/.local/share/nolabel/bin/nolabel"
+fi
+
+if [ ! -x "$NOLABEL_CLI" ]; then
+    osascript -e 'display alert "NoLabel Error" message "NoLabel CLI not found at ~/.local/bin/nolabel." as critical'
+    exit 1
+fi
+
+TOTAL=0
+for f in "$@"; do
+    if [ -e "$f" ]; then
+        TOTAL=$((TOTAL + 1))
+    fi
+done
+
+if [ "$TOTAL" -eq 0 ]; then
+    exit 0
+fi
+
+if [ "$TOTAL" -gt 1 ]; then
+    osascript -e "display notification \"Processing $TOTAL item(s) for corner label removal...\" with title \"NoLabel\" sound name \"Tink\""
+fi
+
+SUCCESS_COUNT=0
+for f in "$@"; do
+    if [ ! -e "$f" ]; then
+        continue
+    fi
+    if "$NOLABEL_CLI" process "$f"; then
+        SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+    fi
+done
+
+if [ "$SUCCESS_COUNT" -gt 0 ]; then
+    if [ "$SUCCESS_COUNT" -eq 1 ] &amp;&amp; [ "$TOTAL" -eq 1 ]; then
+        osascript -e "display notification \"Label removal completed for $(basename "$1")\" with title \"NoLabel\" subtitle \"Original saved to backup/\" sound name \"Glass\""
+    else
+        osascript -e "display notification \"Label removal completed for $SUCCESS_COUNT of $TOTAL files\" with title \"NoLabel\" subtitle \"Originals saved to backup/\" sound name \"Glass\""
+    fi
+fi
+</string>
+					</dict>
+					<key>4</key>
+					<dict>
+						<key>default value</key>
+						<string>/bin/sh</string>
+						<key>name</key>
+						<string>shell</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>value</key>
+						<string>/bin/bash</string>
+					</dict>
+				</dict>
+				<key>isViewVisible</key>
+				<integer>1</integer>
+				<key>location</key>
+				<string>309.000000:305.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>connectors</key>
+	<dict/>
+	<key>workflowMetaData</key>
+	<dict>
+		<key>applicationBundleID</key>
+		<string>com.apple.finder</string>
+		<key>applicationBundleIDsByPath</key>
+		<dict>
+			<key>/System/Library/CoreServices/Finder.app</key>
+			<string>com.apple.finder</string>
+		</dict>
+		<key>applicationPath</key>
+		<string>/System/Library/CoreServices/Finder.app</string>
+		<key>applicationPaths</key>
+		<array>
+			<string>/System/Library/CoreServices/Finder.app</string>
+		</array>
+		<key>inputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject</string>
+		<key>outputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>presentationMode</key>
+		<integer>15</integer>
+		<key>processesInput</key>
+		<false/>
+		<key>serviceApplicationBundleID</key>
+		<string>com.apple.finder</string>
+		<key>serviceApplicationPath</key>
+		<string>/System/Library/CoreServices/Finder.app</string>
+		<key>serviceInputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject</string>
+		<key>serviceOutputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>serviceProcessesInput</key>
+		<false/>
+		<key>systemImageName</key>
+		<string>NSActionTemplate</string>
+		<key>useAutomaticInputType</key>
+		<false/>
+		<key>workflowTypeIdentifier</key>
+		<string>com.apple.Automator.servicesMenu</string>
+	</dict>
+</dict>
+</plist>

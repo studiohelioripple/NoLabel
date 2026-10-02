@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+
+# MacOS
+.DS_Store
+
+# Logs
+logs/daemon_stdout.log
+logs/daemon_stderr.log
+logs/queue.log
+logs/processed_cache.json
+
+# Local directories
+backup/
