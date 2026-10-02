@@ -88,11 +88,7 @@ def wait_until_file_stable(file_path: Path, max_wait: float = 30.0, check_interv
     return file_path.exists() and last_size > 0
 
 
-DEFAULT_WATCH_DIR = (
-    Path.home() / "Documents/Label-Cleaner"
-    if Path.home() / "Documents/Label-Cleaner".exists()
-    else Path.home() / "Documents/Label-Cleaner"
-)
+DEFAULT_WATCH_DIR = Path.home() / "Documents" / "Label-Cleaner"
 
 
 class NoLabelQueue:
