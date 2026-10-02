@@ -26,7 +26,7 @@ You can install this tool suite entirely via a single terminal command.
 ### One-Line Install
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/NoLabel.git ~/.local/share/nolabel && cd ~/.local/share/nolabel && ./install.sh
+git clone https://github.com/studiohelioripple/NoLabel.git ~/.local/share/nolabel && cd ~/.local/share/nolabel && ./install.sh
 ```
 
 *(You will need `python3` and macOS Xcode Command Line Tools `swiftc` installed prior to running.)*
