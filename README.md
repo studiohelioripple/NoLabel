@@ -76,7 +76,9 @@ nolabel logs
 
 ## System Requirements
 
-- **macOS** (Optimized for Apple Silicon / M1+)
+- **Apple Silicon Mac** (M1, M2, M3, M4 series). *Intel Macs are explicitly not supported.*
+- **8GB RAM** minimum.
+- **macOS 12.0+**
 - **Python 3.9+**
 - **Xcode Command Line Tools** (for `swiftc`)
 
