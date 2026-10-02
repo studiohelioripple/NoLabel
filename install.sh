@@ -45,7 +45,12 @@ fi
 # 3. Setup Python Virtual Environment
 echo "[*] Setting up Python virtual environment..."
 cd "$REPO_DIR"
-python3 -m venv .venv
+mkdir -p "$REPO_DIR/bin"
+mkdir -p "$REPO_DIR/logs"
+
+if [ ! -d ".venv" ] || [ ! -f ".venv/bin/python" ]; then
+    python3 -m venv .venv
+fi
 source .venv/bin/activate
 pip install --upgrade pip
 echo "[*] Installing Python dependencies..."
@@ -53,14 +58,15 @@ pip install -r requirements.txt
 
 # 4. Compile Swift Vision Tool
 echo "[*] Compiling Swift Vision binary (macOS native)..."
-swiftc -O -o bin/nolabel_vision scripts/nolabel_vision.swift -framework Vision -framework CoreImage -framework Foundation
+swiftc -O -o "$REPO_DIR/bin/nolabel_vision" "$REPO_DIR/scripts/nolabel_vision.swift" -framework Vision -framework CoreImage -framework Foundation -framework AppKit
+chmod +x "$REPO_DIR/bin/nolabel_vision"
 echo "[✓] Swift compilation successful."
 
 # 5. Link CLI Tool
 echo "[*] Linking CLI tool to $BIN_DIR..."
 mkdir -p "$BIN_DIR"
-ln -sf "$REPO_DIR/bin/nolabel" "$BIN_DIR/nolabel"
 chmod +x "$REPO_DIR/bin/nolabel"
+ln -sf "$REPO_DIR/bin/nolabel" "$BIN_DIR/nolabel"
 
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
     echo "[!] Note: $BIN_DIR is not in your PATH."
@@ -74,13 +80,16 @@ SERVICES_DIR="$HOME/Library/Services"
 mkdir -p "$SERVICES_DIR"
 # Remove existing if any
 rm -rf "$SERVICES_DIR/Remove Corner Label.workflow"
-cp -R "$REPO_DIR/quick_action/Remove Corner Label.workflow" "$SERVICES_DIR/"
-# Note: Finder might take a few seconds to pick up the new Quick Action.
-echo "[✓] Quick Action installed."
+if [ -d "$REPO_DIR/quick_action/Remove Corner Label.workflow" ]; then
+    cp -R "$REPO_DIR/quick_action/Remove Corner Label.workflow" "$SERVICES_DIR/"
+    echo "[✓] Quick Action installed."
+else
+    echo "[!] Warning: Quick Action workflow not found at $REPO_DIR/quick_action/Remove Corner Label.workflow"
+fi
 
 # 7. Install Launchd Service (Folder Watcher)
 echo "[*] Installing background Folder Watcher daemon..."
-"$BIN_DIR/nolabel" install-service
+"$REPO_DIR/bin/nolabel" install-service
 
 echo ""
 echo "=========================================="

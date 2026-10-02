@@ -89,6 +89,9 @@ elif target.is_dir():
     install-service)
         echo "[*] Installing NoLabel launchd background service..."
         mkdir -p "${USER_LAUNCHAGENTS}"
+        mkdir -p "${SUITE_DIR}/logs"
+        mkdir -p "${WATCH_FOLDER}"
+        mkdir -p "${BACKUP_FOLDER}"
         sed -e "s|{{SUITE_DIR}}|${SUITE_DIR}|g" \
             -e "s|{{PYTHON_BIN}}|${VENV_PYTHON}|g" \
             -e "s|{{HOME}}|${HOME}|g" \

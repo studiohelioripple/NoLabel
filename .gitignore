@@ -10,10 +10,11 @@ env/
 .DS_Store
 
 # Logs
-logs/daemon_stdout.log
-logs/daemon_stderr.log
-logs/queue.log
-logs/processed_cache.json
+logs/
+*.log
+
+# Compiled Binaries
+bin/nolabel_vision
 
 # Local directories
 backup/
